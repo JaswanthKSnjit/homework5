@@ -1,183 +1,89 @@
-"""Implements a numeric-based calculator with a hidden coverage command."""
-
-from app.operations import Operations
-
-
-class Calculation:
-    """Stores a single arithmetic calculation (operation, operands, result)."""
-
-    def __init__(self, operation, num1, num2, result):
-        """
-        Initialize a Calculation instance.
-
-        Args:
-            operation (str): The operation name (e.g. 'addition').
-            num1 (float): First operand.
-            num2 (float): Second operand.
-            result (float): Computed result of the operation.
-        """
-        self.operation = operation
-        self.num1 = num1
-        self.num2 = num2
-        self.result = result
-
-    def __str__(self):
-        """
-        Return a human-readable representation of the calculation.
-
-        Returns:
-            str: E.g. "3.0 addition 4.0 = 7.0"
-        """
-        return f"{self.num1} {self.operation} {self.num2} = {self.result}"
-
+from app.commands.addition import AddCommand
+from app.commands.subtraction import SubtractCommand
+from app.commands.multiplication import MultiplyCommand
+from app.commands.division import DivideCommand
+from app.commands.exit import ExitCommand  # Import the ExitCommand
 
 class Calculator:
-    """A class providing a REPL for numeric-based arithmetic operations."""
+    """Handles execution of arithmetic operations using modular commands."""
 
     history = []
-
-    @classmethod
-    def run(cls):
-        """
-        Start the calculator REPL loop.
-
-        Options:
-          1 => addition
-          2 => subtract
-          3 => multiply
-          4 => division
-          5 => history
-          6 => clear
-          7 => quit
-          8 => stoptest (hidden coverage path)
-        """
-        print("=========== Calculator Menu ===========")
-        print("1) addition")
-        print("2) subtract")
-        print("3) multiply")
-        print("4) division")
-        print("5) history (view past calculations)")
-        print("6) clear   (clear calculation history)")
-        print("7) quit    (exit the calculator)")
-        print("=======================================\n")
-
-        while True:
-            action = input("Enter a number (1–7): ").strip().lower()
-
-            if action == "7":
-                print("Exiting calculator. Goodbye!")
-                break
-            elif action == "8":
-                # Hidden command for coverage
-                print("Testing coverage for final line.")
-                return
-            elif action == "5":
-                print(cls.get_history())
-            elif action == "6":
-                cls.clear_history()
-            elif action in ["1", "2", "3", "4"]:
-                # Map numeric choice to operation name
-                if action == "1":
-                    operation = "addition"
-                elif action == "2":
-                    operation = "subtract"
-                elif action == "3":
-                    operation = "multiply"
-                else:
-                    operation = "division"
-
-                num1, num2 = cls.get_inputs()
-                if num1 is None or num2 is None:
-                    print("Exiting calculator. Goodbye!")
-                    break
-
-                result = cls.compute(operation, num1, num2)
-                if result is not None:
-                    print(f"The result is: {result}")
-                    calculation = Calculation(operation, num1, num2, result)
-                    cls.add_to_history(calculation)
-            else:
-                print("Invalid choice. Please enter a number from 1 to 7.")
-
-        return
+    COMMANDS = {
+        "add": AddCommand,
+        "subtract": SubtractCommand,
+        "multiply": MultiplyCommand,
+        "divide": DivideCommand,
+        "exit": ExitCommand  # Register the ExitCommand
+    }
 
     @staticmethod
-    def get_inputs():
-        """
-        Prompt for two numeric inputs, or 'quit' to exit.
-
-        Returns:
-            (float | None, float | None): The two numbers, or (None, None) if quitting/invalid.
-        """
-        try:
-            first = input("Enter the first number: ").strip()
-            if first.lower() == "quit":
-                return None, None
-
-            second = input("Enter the second number: ").strip()
-            if second.lower() == "quit":
-                return None, None
-
-            return float(first), float(second)
-        except ValueError:
-            print("Invalid number. Please enter numeric values.")
-            return None, None
-
-    @classmethod
-    def compute(cls, operation, num1, num2):
-        """
-        Perform an arithmetic operation on two floats.
-
-        Args:
-            operation (str): One of 'addition', 'subtract', 'multiply', 'division'.
-            num1 (float): First operand.
-            num2 (float): Second operand.
-
-        Returns:
-            float | None: The result, or None if division by zero.
-        """
-        operation_map = {
-            "addition": Operations.add,
-            "subtract": Operations.subtract,
-            "multiply": Operations.multiply,
-            "division": Operations.divide,
-        }
-
-        # Check if the operation is valid BEFORE attempting to use the map
-        if operation not in operation_map:
+    def compute(operation, *args):
+        """Executes the given operation using the command pattern."""
+        if operation not in Calculator.COMMANDS:
             raise ValueError(f"Unsupported operation: {operation}")
+        
+        command = Calculator.COMMANDS[operation](*args)
+        result = command.execute()
+        
+        # Ensure whole numbers are formatted without ".0"
+        formatted_result = int(result) if result.is_integer() else result
+        Calculator.history.append(f"{' '.join(map(str, args))} {operation} = {formatted_result}")
+        
+        return result
 
-        try:
-            return operation_map[operation](num1, num2)
-        except ZeroDivisionError:
-            print("Cannot divide by zero.")
-            return None
+    @staticmethod
+    def show_history():
+        """Displays calculation history."""
+        if not Calculator.history:
+            print("No calculations recorded.")
+        else:
+            print("\nCalculation History:")
+            for entry in Calculator.history:
+                print(entry)
 
-    @classmethod
-    def add_to_history(cls, calculation):
-        """
-        Add a Calculation object to the history list.
-
-        Args:
-            calculation (Calculation): The calculation to store.
-        """
-        cls.history.append(calculation)
-
-    @classmethod
-    def get_history(cls):
-        """
-        Return a string representation of all calculations in history.
-
-        Returns:
-            str: If empty, "No calculations recorded."
-                 Otherwise, each calculation on its own line.
-        """
-        if not cls.history:
-            return "No calculations recorded."
-        return "\n".join(str(calc) for calc in cls.history)
-
-    @classmethod
-    def clear_history(cls):
-        """Clear all stored calculations."""
-        cls.history.clear()
+    @staticmethod
+    def clear_history():
+        """Clears the history."""
+        Calculator.history.clear()
         print("History has been cleared.")
+
+    @staticmethod
+    def show_menu():
+        """Displays available commands dynamically."""
+        print("\nAvailable Commands:")
+        for command in Calculator.COMMANDS.keys():
+            print(f"- {command} <num1> <num2> (e.g., {command} 5 5)")
+        print("- history (View calculation history)")
+        print("- clear (Clear calculation history)")
+        print("- exit (Exit the calculator)")
+
+    @staticmethod
+    def run():
+        """Interactive REPL for the calculator."""
+        print("Welcome to the Command Pattern Calculator!")
+        print("Type 'menu' to view options or 'exit' to quit.")
+
+        while True:
+            user_input = input(">>> ").strip().lower()
+
+            if user_input == "exit":
+                Calculator.compute("exit")  # Execute exit command
+            elif user_input == "menu":
+                Calculator.show_menu()
+            elif user_input == "history":
+                Calculator.show_history()
+            elif user_input == "clear":
+                Calculator.clear_history()
+            else:
+                parts = user_input.split()
+                if len(parts) >= 2 and parts[0] in Calculator.COMMANDS:
+                    try:
+                        numbers = list(map(float, parts[1:]))
+                        result = Calculator.compute(parts[0], *numbers)
+                        print(f"Result: {result}")
+                    except ValueError:
+                        print("Invalid input. Please enter numeric values.")
+                    except ZeroDivisionError as e:
+                        print(f"Error: {e}")
+                else:
+                    print("Invalid command. Type 'menu' to see available commands.")

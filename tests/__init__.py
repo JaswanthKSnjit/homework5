@@ -1,1 +1,1 @@
-"""Tests package for the BASIC_CALCULATOR application."""
+"""Tests package for the Command Pattern Calculator."""

@@ -5,10 +5,9 @@ from app.calculator import Calculator
 
 fake = Faker()
 
-
 def generate_test_data(num_records):
     """Generate test data for arithmetic operations using Calculator.compute()."""
-    operations = ["addition", "subtract", "multiply", "division"]
+    operations = ["add", "subtract", "multiply", "divide"]
     test_cases = []
 
     for _ in range(num_records):
@@ -17,7 +16,7 @@ def generate_test_data(num_records):
         operation = fake.random_element(elements=operations)
 
         # Avoid division by zero input
-        if operation == "division" and num2 == 0:
+        if operation == "divide" and num2 == 0:
             num2 = Decimal(1)
 
         # Compute expected result using actual production logic
@@ -26,7 +25,6 @@ def generate_test_data(num_records):
         test_cases.append((num1, num2, operation, result))
 
     return test_cases
-
 
 def pytest_addoption(parser):
     """Add CLI option to control the number of test records."""
@@ -37,7 +35,6 @@ def pytest_addoption(parser):
         type=int,
         help="Number of test records to generate",
     )
-
 
 def pytest_generate_tests(metafunc):
     """Dynamically parameterize tests requiring (num1, num2, operation, expected_result)."""
