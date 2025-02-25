@@ -1,6 +1,6 @@
 # Basic Calculator
 
--- Added faker to the [basic_calculator](https://github.com/JaswanthKSnjit/basic_calculator) project.
+-- I have created two separate branches as per Assignment 5 requirements [commands](https://github.com/JaswanthKSnjit/homework5/tree/commands) and [plugins](https://github.com/JaswanthKSnjit/homework5/tree/plugins) respective code and there functionalities are there in those particular branch.
 
 ## Setup Instructions
 
