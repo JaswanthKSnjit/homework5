@@ -1,7 +1,7 @@
 # Command Pattern Calculator
 
--- This a Command Pattern Calculator
--- When you run the program with <code>python main.py</code>, it will prompt you to type "menu" to view options or "exit" to quit the program. After that, it will display the four arithmetic operations you can perform. The format is <code>{command} <num1> <num2> (e.g., add 5 5)</code>, and it will then output the result.
+-- This a Command Pattern Calculator.<br>
+-- When you run the program with <code>python main.py</code>, it will prompt you to type "menu" to view options or "exit" to quit the program. After that, it will display the four arithmetic operations you can perform. The format is <code>{command} <num1> <num2> (e.g., add 5 5)</code>, and it will then output the result.<br>
 -- Basic Calculator program is in [main](https://github.com/JaswanthKSnjit/homework5/tree/main) branch and code with Plugin Architecture is at [Plugins](https://github.com/JaswanthKSnjit/homework5/tree/plugins) branch.
 
 ## Setup Instructions
